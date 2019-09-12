@@ -1,0 +1,47 @@
+\ProvidesPackage{roundrule}
+[2014/05/01 V1.01 Provides rules with rounded endcaps]
+%
+% THIS MATERIAL IS SUBJECT TO THE LaTeX Project Public License
+%
+% Special thanks to users Herbert and Prof. Dan Luecking at tex.stackexchange.com:
+% http://tex.stackexchange.com/questions/161297/
+%        is-there-such-a-thing-as-a-mathrule-rounded-endcaps
+%
+% V1.00 - initial release
+% V1.01 - require package calc, which was omitted as an oversight.
+
+\pdfcompresslevel=0 %%% to see how it works in the pdf code
+\RequirePackage{graphicx}
+\RequirePackage{calc}
+
+\newcommand\roundrule[3][0pt]{%
+  \ifdim#2>#3\round@hrule[#1]{#2}{#3}\else\round@vrule[#1]{#2}{#3}\fi}
+
+\newcommand\round@hrule[3][0pt]{%
+  \@tempdima=#3%
+  \rule[#1]{0pt}{#3}% Needed to account for .5\@tempdima vertical offset of rounded rule
+  \raisebox{.5\@tempdima+#1}{%
+    \makebox[#2][l]{\kern-.5\@tempdima\@@roundrule{#2}{#3}}}%
+}
+
+\newcommand\round@vrule[3][0pt]{%
+  \@tempdima=#2%
+  \rule[#1]{0pt}{#3}% Needed to account for .5\@tempdima vertical offset of rounded rule
+  \raisebox{-.0\@tempdima+#1}{%
+    \kern0.5\@tempdima%
+    \rotatebox{90}{\kern-0.5\@tempdima\makebox[#3][l]{\@@roundrule{#3}{#2}}}%
+    \kern0.5\@tempdima}%
+}
+
+\def\@@roundrule#1#2{%
+  \@tempdima=#1%
+  \@tempdimb=#2%
+  \@tempdima=0.996264\@tempdima% LaTeX to PDF point conversion (72/72.27)
+  \@tempdimb=0.996264\@tempdimb% LaTeX to PDF point conversion (72/72.27)
+  \pdfliteral{%
+    q []0 d %
+    1 J %  set line cap to rounded ends
+    \strip@pt\@tempdimb\space w \strip@pt\@tempdimb\space 0 m %
+    \strip@pt\@tempdima\space 0 l S Q }}
+
+\endinput
