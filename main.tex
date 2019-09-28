@@ -1,0 +1,316 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{enumitem}
+\usepackage{bm}
+\usepackage[fleqn]{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\newtheorem{thm}{Theorem}
+\pagestyle{fancy}
+
+\newcommand{\false}{\ensuremath{\mathbf{f}}\xspace}
+\newcommand{\true}{\ensuremath{\mathbf{t}}\xspace}
+\newcommand{\impl}{\mathbin{\Rightarrow}}
+\newcommand{\biim}{\mathbin{\Leftrightarrow}}
+
+\topmargin -.5in
+\textheight 9in
+\oddsidemargin -.25in
+\evensidemargin -.25in
+\textwidth 7in
+
+\begin{document}
+
+\author{XuLin Yang, 904904}
+\title{COMP30026 Models of Computation \\ Assignment 1}
+\maketitle
+
+\medskip
+
+\section*{Challenge 1}
+\[
+\begin{array}{lll}
+   F & = & \forall x\ (\neg P(x,x))
+\\ G & = &
+    \forall x\ \forall y\ \forall z\ (P(x,y) \land P(y,z) \impl P(x,z))
+\\ G' & = &
+    \forall x\ \forall y\ \forall z\ (P(x,y) \land P(y,z) \impl \neg P(x,z))
+\\ H & = & \forall x\ \forall y\ (P(x,y) \impl \neg P(y,x))
+\end{array}
+\]
+
+\begin{enumerate}[label=\alph*.]
+    \item Show that $F \lor G \lor G' \lor H$ is not valid.
+    
+    note: $\mathbf{f}$ = false, $\mathbf{t}$ = true in the following answers. \\
+    
+    \begin{tabular}{c|c|c}
+        domain & $P(a, b)$ & formula  \\ \hline \hline
+        \{-1, 0, 1\} & $P(a, b) = 2 a + b \geq 0$ &
+            \begin{tabular}{|c|c|c|c|}
+                F & G & G' & H \\ \hline 
+                $x=1$ & $x=0, y=1, z=-1$ & $x=0, y=0, z=0$ & $x=0, y=0$ \\
+                $\mathbf{f}$ & $\mathbf{f}$ & $\mathbf{f}$ & $\mathbf{f}$ \\ \hline
+            \end{tabular}
+    \end{tabular}
+    
+    So we have one intepretation gives $F \lor G \lor G' \lor H$ = $\mathbf{f}$. \\ It shows $F \lor G \lor G' \lor H$ is not valid.
+    
+    \item Show that $F \land G' \land H$ is satisfiable.
+    
+    \begin{tabular}{c|c|c}
+        domain & $P(a, b)$ & formula  \\ \hline \hline
+        \{0\} & $P(a, b) = \mathbf{f}$ & 
+            \begin{tabular}{c|c|c|c}
+                F & G' & H & $F \land G' \land H$ \\ \hline \hline
+                $\mathbf{t}$ & $\mathbf{t}$ & $\mathbf{t}$ & $\mathbf{t}$
+            \end{tabular}
+        \\
+    \end{tabular}
+    
+    The listed intepretation shows $F \land G' \land H$ is satisfiable.
+    
+    \item Show that $(F \land G) \Rightarrow H$ is valid. \\
+    Let $K = (F \land G) \Rightarrow H$, 
+    \begin{proof}
+    $K$ is valid \\
+    
+    is equivalent to prove $\neg K$ is unsatisfiable.
+    
+        \begin{align*}
+            \neg K \equiv\  & \neg [(F \land G) \Rightarrow H] \\
+            \equiv\  & \neg [ \neg (F \land G) \lor H] \tag{by implication} \\
+            \equiv\  & F \land G \land \neg H \tag{by deriving negation in} \\
+            \equiv\  & [ \forall x\  (\neg P(x, x)) ] \land \{ \forall x\ \forall y\ \forall z\ [(\neg (P(x,y) \land P(y,z)) \lor P(x,z) ]\} \land [\neg \forall x\ \forall y\ (\neg P(x,y) \lor \neg P(y,x))] \tag{by replacing occurrence of $\Rightarrow$} \\
+            \equiv\  & [ \forall x\  (\neg P(x, x)) ] \land [ \forall x\ \forall y\ \forall z\ (\neg P(x,y) \lor \neg P(y,z) \lor P(x,z)) ] \land [\exists x\ \exists y\ (P(x,y) \land P(y,x))] \tag{by deriving negation in} \\
+            \equiv\  & [ \forall x\  (\neg P(x, x)) ] \land [ \forall u\ \forall v\ \forall w\ (\neg P(u,v) \lor \neg P(v,w) \lor P(u,w)) ] \land [\exists z\ \exists y\ (P(z,y) \land P(y,z))] \tag{by standarizing apart} \\
+            \leadsto\  & [ \forall x\  (\neg P(x, x)) ] \land [ \forall u\ \forall v\ \forall w\ (\neg P(u,v) \lor \neg P(v,w) \lor P(u,w)) ] \land P(a, b) \land P(b, a) \tag{by skolemization} \\
+            \equiv\  & \neg P(x, x) \land (\neg P(u,v) \lor \neg P(v,w) \lor P(u,w)) \land P(a, b) \land P(b, a) \tag{by dropping universal quantifiers} \\
+        \end{align*}
+        
+        and written as a set of sets of literals: 
+        $$\left\{
+            \begin{aligned}  
+                &\{\neg P(x, x) \}, \\
+                &\{\neg P(u,v), \neg P(v,w), P(u,w) \}, \\
+                &\{P(a, b) \}, \\
+                &\{P(b, a) \}
+            \end{aligned}
+        \right\} $$
+        
+        and do the resolution: \\
+        \includegraphics[width=\textwidth]{1c}
+        \begin{align*}
+            & \text{As resolution shows: } \neg K \text{ is unsatisfiable.} \\
+            & \therefore K \text{ is valid.} \tag*{\qedhere}
+        \end{align*}
+    \end{proof}
+\end{enumerate}
+
+\section*{Challenge 2}
+\begin{itemize}
+    \setlength{\itemsep}{-0.5ex}
+    \item
+    $F(x)$, which stands for ``the force is with $x$''
+    \item
+    $J(x)$, which stands for ``$x$ is a Jedi master''
+    \item
+    $E(x,y)$, which stands for ``$x$ exceeds $y$''
+    \item
+    $P(x,y)$, which stands for ``$x$ is a pupil of $y$''
+    \item
+    $V(x)$, which stands for ``$x$ is venerated''
+\end{itemize}
+and use the constant `$a$' to denote Yoda.
+
+\begin{enumerate}[label=\alph*.]
+    \item For each of the statements $S_1$, ..., $S_4$, express it \textit{as a formula in first-order predicate logic} (not clausal form):
+    
+    $S_1 = \forall x (J(x) \impl F(x))$
+    
+    $S_2 = \exists y (J(y) \land E(a, y))$
+    
+    $S_3 = \forall z \{\{J(z) \impl [F(z) \land (\forall u (P(u, z) \impl E(u, z)))] \} \impl V(z) \}$
+    
+    $S_4 = \forall v \{ [J(v) \impl (\neg \exists w (P(w, v)))] \impl V(v) \}$
+    
+    \item Translate $S_1$-$S_3$ to clausal form.
+    
+    % S1
+    \begin{align*}
+        S_1 \equiv\  & \forall x (J(x) \impl F(x)) \\
+        \equiv\  & \forall x (\neg J(x) \lor F(x)) \tag{by replacing occurrence of $\Rightarrow$} \\
+        \equiv\  & \neg J(x) \lor F(x) \tag{by dropping universal quantifiers} \\
+    \end{align*}
+    
+    and written as a set of sets of literals: 
+    $$\left\{
+        \begin{aligned}  
+            &\{\neg J(x), F(x) \}
+        \end{aligned}
+    \right\} $$
+    
+    % S2
+    \begin{align*}
+        S_2 \equiv\  & \exists y (J(y) \land E(a, y)) \\
+        \leadsto\  & J(b) \land E(a, b) \tag{by skolemization} \\
+    \end{align*}
+    
+    and written as a set of sets of literals: 
+    $$\left\{
+        \begin{aligned}  
+            &\{J(b)\}, \\
+            &\{E(a, b) \}
+        \end{aligned}
+    \right\} $$
+    
+    % S3
+    \begin{align*}
+        S_3 \equiv\  & \forall z \{\{J(z) \impl [F(z) \land (\forall u (P(u, z) \impl E(u, z)))] \} \impl V(z) \} \\
+        \equiv\  & \forall z \{\neg \{\neg J(z) \lor [F(z) \land (\forall u  (\neg P(u, z) \lor E(u, z)))] \} \lor V(z) \} \tag{by replacing occurrence of $\Rightarrow$} \\
+        \equiv\  & \forall z \{\{J(z) \land \neg[F(z) \land (\forall u (\neg P(u, z) \lor E(u, z)))] \} \lor V(z) \} \tag{by deriving negation in} \\
+        \equiv\  & \forall z \{\{J(z) \land [\neg F(z) \lor \neg(\forall u (\neg P(u, z) \lor E(u, z)))] \} \lor V(z) \} \tag{by deriving negation in} \\
+        \equiv\  & \forall z \{\{J(z) \land [\neg F(z) \lor (\exists u (P(u, z) \land \neg E(u, z)))] \} \lor V(z) \} \tag{by deriving negation in} \\
+        \leadsto\  & \forall z \{\{J(z) \land [\neg F(z) \lor (P(f(z), z) \land \neg E(f(z), z))] \} \lor V(z) \} \tag{by skolemization} \\
+        \equiv\  & \{J(z) \land [\neg F(z) \lor (P(f(z), z) \land \neg E(f(z), z))] \} \lor V(z) \tag{by dropping universal quantifiers} \\
+        \equiv\  & (J(z) \lor V(z)) \land [(V(z) \lor \neg F(z)) \lor (P(f(z), z) \land \neg E(f(z), z))] \tag{by distributivity} \\
+        \equiv\  & (J(z) \lor V(z)) \land [(V(z) \lor \neg F(z) \lor P(f(z), z) ) \land (V(z) \lor \neg F(z) \lor \neg E(f(z), z))] \tag{by distributivity} \\
+    \end{align*}
+    
+    and written as a set of sets of literals: 
+    $$\left\{
+        \begin{aligned}  
+            &\{J(z), V(z) \}, \\
+            &\{V(z), \neg F(z), P(f(z), z) \}, \\
+            &\{V(z), \neg F(z), \neg E(f(z), z) \}
+        \end{aligned}
+    \right\} $$
+    
+    \item Translate \textit{the negation of} $S_4$ to clausal form.
+    
+    % -S4
+    \begin{align*}
+        \neg S_4 \equiv\  & \neg \forall v \{ [J(v) \impl (\neg \exists w (P(w, v)))] \impl V(v) \} \\
+        \equiv\  & \neg \forall v \{ \neg [\neg J(v) \lor (\neg \exists w (P(w, v)))] \lor V(v) \} \tag{by replacing occurrence of $\Rightarrow$} \\
+        \equiv\  & \exists v \{ [\neg J(v) \lor ( \forall w (\neg P(w, v)))] \land \neg V(v) \} \tag{by deriving negation in} \\
+        \leadsto\  & \{ [\neg J(c) \lor (\forall w (\neg P(w, c)))] \land \neg V(c) \} \tag{by skolemization} \\
+        \equiv\  & (\neg J(c) \lor \neg P(w, c)) \land \neg V(c) \tag{by dropping universal quantifiers} \\
+    \end{align*}
+    
+    and written as a set of sets of literals: 
+    $$\left\{
+        \begin{aligned}  
+            &\{\neg J(c), \neg P(w, c) \}, \\
+            &\{\neg V(c) \}
+        \end{aligned}
+    \right\} $$
+    
+    \item Give a proof by resolution to show that $S_4$ follows from the other statements.
+    
+    \begin{proof}
+        $S_1 \land S_2 \land S_3 \models S_4$
+        \begin{align*}
+            & \text{is equivalent to prove: } S_1 \land S_2 \land S_3 \land \neg S_4\ \text{is unsatisfiable.} \\
+            & \includegraphics[width=\textwidth]{2d} \\
+            & \text{As resolution shows: } S_1 \land S_2 \land S_3 \land \neg S_4\ \text{is unsatisfiable} \\
+            & \therefore S_1 \land S_2 \land S_3 \models S_4 \tag*{\qedhere}
+        \end{align*}
+    \end{proof}
+    
+\end{enumerate}
+
+\section*{Challenge 3}
+\begin{enumerate}[label=\alph*.]
+    \item Consider the Boolean vector function $\mathbf{f}_a(b_1, b_2) = (\neg b_1, b_1 \oplus b_2)$. Show that this function is reversible.
+    
+    Note: 0 = false, 1 = true in the following answers.
+    
+    \begin{tabular}{cc|cc}
+         $b_1$ & $b_2$ & $\neg b_1$ & $b_1 \oplus b_2$ \\ \hline \hline
+         0 & 0 & 1 & 0 \\
+         0 & 1 & 1 & 1 \\
+         1 & 0 & 0 & 1 \\
+         1 & 1 & 0 & 0
+    \end{tabular}
+    
+    As we can see every input has an unique output, $\mathbf{f}_a(b_1, b_2)$ is reversible.
+    
+    \item Consider the Boolean vector function $\mathbf{f}_b(b_1, b_2, b_3) = (b_1 \oplus b_2, b_2 \oplus b_3, b_3 \oplus b_1)$. Show that this function is \textit{not} reversible.
+    
+    \begin{tabular}{ccc|ccc}
+         $b_1$ & $b_2$ & $b_3$ & $b_1 \oplus b_2$ & $b_2 \oplus b_3$ & $b_3 \oplus b_1$ \\ \hline \hline
+         0 & 0 & 0 & 0 & 0 & 0 \\
+         0 & 0 & 1 & 0 & 1 & 1 \\
+         0 & 1 & 0 & 1 & 1 & 0 \\
+         0 & 1 & 1 & 1 & 0 & 1 \\
+         1 & 0 & 0 & 1 & 0 & 1 \\
+         1 & 0 & 1 & 1 & 1 & 0 \\
+         1 & 1 & 0 & 0 & 1 & 1 \\
+         1 & 1 & 1 & 0 & 0 & 0 \\
+    \end{tabular}
+    
+    As we can see $\mathbf{f}_b(0, 0, 0) = \mathbf{f}_b(1, 1, 1)$,  $\mathbf{f}_b(b_1, b_2, b_3)$ is nor reversible.
+    
+    \item Is the Boolean vector function $\mathbf{f}_c(b_1, b_2, b_3) = (b_1 \oplus b_3, \neg b_3, b_1 \oplus b_2)$ reversible? Justify your answer.
+    
+    \begin{tabular}{ccc|ccc}
+         $b_1$ & $b_2$ & $b_3$ & $b_1 \oplus b_3$ & $\neg b_3$ & $b_1 \oplus b_2$ \\ \hline \hline
+         0 & 0 & 0 & 0 & 1 & 0 \\
+         0 & 0 & 1 & 1 & 0 & 0 \\
+         0 & 1 & 0 & 0 & 1 & 1 \\
+         0 & 1 & 1 & 1 & 0 & 1 \\
+         1 & 0 & 0 & 1 & 1 & 1 \\
+         1 & 0 & 1 & 0 & 0 & 1 \\
+         1 & 1 & 0 & 1 & 1 & 0 \\
+         1 & 1 & 1 & 0 & 0 & 0 \\
+    \end{tabular}
+    
+    As we can see every input has an unique output, $\mathbf{f}_c(b_1, b_2, b_3)$ is reversible.
+    
+    \item Give a formula, in terms of $n$, for the fraction of distinct n-dimensional Boolean vector functions that are reversible.
+    
+    note: \# means the number of
+    
+    \#permutation without replacement of $k$ input = $k!$
+    
+    \#permutation with replacement of $k$ input = $k^k$
+    
+    A n-dimensional boolean vector function has $2^n$ inputs.
+    
+    \bigbreak
+    
+    To make a $k$ input function invertible is just to choose $k$ samples from input and each input picked once. This is equivalent to a permute without replacement of $k$ input.
+    
+    \begin{align*}
+        \therefore\ \ \ \ & \# \text{invertible n-dimensional boolean vector function} \\
+        = & \# \text{invertible function with } 2^n \text{ inputs} \\
+        = & \# \text{permutation without replacement of } 2^n \text{ inputs} \\
+        = & (2^n)!
+    \end{align*}
+    
+    To enumerate all possible ways to mapping $k$ input function with $k$ output is equivalent to find distinct choices of sampling from inputs. This is achieved by permuting with replacement.
+    
+    \begin{align*}
+        \therefore\ \ \ \ \ & \# \text{n-dimensional boolean vector function} \\
+        =\ & \# \text{function with } 2^n \text{ inputs mapped to } 2^n \text{ with replacement}\\
+        =\ & \# \text{permutation with replacement of } 2^n \text{ inputs} \\
+        =\ & (2^n)^{2^n}
+    \end{align*}
+    
+    \begin{align*}
+        \text{With all discussed above,} & \\
+        & \text{fraction of distinct n-dimensional invertible Boolean vector functions} \\
+        =\ & \frac{\# \text{n-dimensional invertible Boolean vector functions}}{\# \text{n-dimensional Boolean vector functions}} \\
+        =\ & \frac{(2^n)!}{(2^n)^{2^n}}
+    \end{align*}
+    
+    
+\end{enumerate}
+
+\end{document}
+\grid
+\grid
